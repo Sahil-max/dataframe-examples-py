@@ -12,7 +12,6 @@ if __name__ == '__main__':
         .builder \
         .appName("DataFrames examples") \
         .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4') \
-        .master('local[*]') \
         .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
@@ -55,7 +54,9 @@ if __name__ == '__main__':
 
     # Applying transformation on dataframe using DSL (Domain Specific Language)
     txn_fct_df = txn_fct_df \
-        .withColumn("created_time_ist", unix_timestamp(txn_fct_df["created_time_ist"], "yyyy-MM-dd HH:mm:ss").cast(TimestampType()))
+        .withColumn("epoch_time", unix_timestamp(txn_fct_df["created_time_ist"], "yyyy-MM-dd HH:mm:ss")) \
+        .withColumn("created_time_ist",
+                unix_timestamp(txn_fct_df["created_time_ist"], "yyyy-MM-dd HH:mm:ss").cast(TimestampType()))
 
     txn_fct_df.printSchema()
     txn_fct_df.show(5, False)
@@ -76,4 +77,4 @@ if __name__ == '__main__':
 
     txnAggDf.show(5, False)
 
-# spark-submit --packages "org.apache.hadoop:hadoop-aws:2.7.4" dataframe/ingestion/rdd/rdd2df_thru_explicit_schema.py
+# spark-submit --master yarn --packages "org.apache.hadoop:hadoop-aws:2.7.4" dataframe/ingestion/rdd/rdd2df_thru_explicit_schema.py
