@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.window import Window
-from pyspark.sql import functions as F
+from pyspark.sql.functions import *
 from pyspark.sql.types import IntegerType
 import os.path
 import yaml
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         .repartition(5)
 
     print("# of records = " + str(nyc_omo_df.count()))
-    print("# of partitions = " + str(nyc_omo_df.rdd.getNumPartitions))
+    print("# of partitions = " + str(nyc_omo_df.rdd.getNumPartitions()))
 
     nyc_omo_df.printSchema()
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         .groupBy("Boro") \
         .agg({"Zip": "collect_set"}) \
         .withColumnRenamed("collect_set(Zip)", "ZipList") \
-        .withColumn("ZipCount", F.size("ZipList"))
+        .withColumn("ZipCount", size("ZipList"))
 
     boro_zip_df \
         .select("Boro", "ZipCount", "ZipList") \
@@ -64,10 +64,10 @@ if __name__ == '__main__':
     # Window functions
     window_spec = Window.partitionBy("OMOCreateDate")
     omo_daily_freq = nyc_omo_df \
-        .withColumn("OMODailyFreq", F.count("OMOID").over(window_spec))
+        .withColumn("OMODailyFreq", count("OMOID").over(window_spec))
 
     print("# of partitions in window'ed OM dataframe = " + str(omo_daily_freq.count()))
-    omo_daily_freq.show(5)
+    omo_daily_freq.show(30)
 
     omo_daily_freq.select("OMOCreateDate", "OMODailyFreq") \
         .distinct() \
